@@ -1,0 +1,609 @@
+<!doctype html>
+<html>
+<head>
+<!--<script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/webaudio-controls/webaudio-controls.html" >-->
+</head>
+<body>
+<div id="container">
+<h1>CVtoDMX Setup</h1>
+<table>
+<tr><td>DMX Out</td><td><select id="dmxout"></select></td></tr>
+<tr><td>DMX In</td><td><select id="dmxin"></select></td></tr>
+<tr><td>MIDI CC# In</td><td><select id="midiin" onchange="PortSet()"></select></td></tr>
+</table>
+<table>
+<tr><td colspan="8">CC#</td></tr>
+<tr><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+<!--<tr>
+  <td><webaudio-slider id="ch0" min="0" max="127"></webaudio-slider></td>
+  <td><webaudio-slider id="ch1" min="0" max="127"></webaudio-slider></td>
+  <td><webaudio-slider id="ch2" min="0" max="127"></webaudio-slider></td>
+  <td><webaudio-slider id="ch3" min="0" max="127"></webaudio-slider></td>
+  <td><webaudio-slider id="ch4" min="0" max="127"></webaudio-slider></td>
+  <td><webaudio-slider id="ch5" min="0" max="127"></webaudio-slider></td>
+  <td><webaudio-slider id="ch6" min="0" max="127"></webaudio-slider></td>
+  <td><webaudio-slider id="ch7" min="0" max="127"></webaudio-slider></td>
+</tr>-->
+<tr>
+  <td><input type="range" id="ch0" min="0" max="127" value="0"/></td>
+  <td><input type="range" id="ch1" min="0" max="127" value="0"/></td>
+  <td><input type="range" id="ch2" min="0" max="127" value="0"/></td>
+  <td><input type="range" id="ch3" min="0" max="127" value="0"/></td>
+  <td><input type="range" id="ch4" min="0" max="127" value="0"/></td>
+  <td><input type="range" id="ch5" min="0" max="127" value="0"/></td>
+  <td><input type="range" id="ch6" min="0" max="127" value="0"/></td>
+  <td><input type="range" id="ch7" min="0" max="127" value="0"/></td>
+</tr>
+</table>
+<hr/>
+<button onclick="ReadSettings()">Reload Settings from device</button>
+<button onclick="SaveSettings()">Save Settings to device</button><br/>
+<br/>
+Mode : <select onchange="SetDirect(this.selectedIndex)"><option>Normal</option><option>Direct</option></select><br/>
+<hr/>
+<div id="settingsbase">
+<table>
+  <tr><td>DMX ch</td><td>CV/CC#</td><td>Tablen</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>
+  <tr><td><input id="s0ch" onchange="SetData(0,this.value)"/></td><td>
+    <select id="s0cv" onchange="SetData(1,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s0tb" onchange="SetData(2,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s0t1" onchange="SetData(3,this.value)"/></td><td><input id="s0t2" onchange="SetData(4,this.value)"/></td><td><input id="s0t3" onchange="SetData(5,this.value)"/></td>
+    <td><input id="s0t4" onchange="SetData(6,this.value)"/></td><td><input id="s0t5" onchange="SetData(7,this.value)"/></td><td><input id="s0t6" onchange="SetData(8,this.value)"/></td>
+    <td><input id="s0t7" onchange="SetData(9,this.value)"/></td><td><input id="s0t8" onchange="SetData(10,this.value)"/></td><td><input id="s0t9" onchange="SetData(11,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s1ch" onchange="SetData(12,this.value)"/></td><td>
+    <select id="s1cv" onchange="SetData(13,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s1tb" onchange="SetData(14,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s1t1" onchange="SetData(15,this.value)"/></td><td><input id="s1t2" onchange="SetData(16,this.value)"/></td><td><input id="s1t3" onchange="SetData(17,this.value)"/></td>
+    <td><input id="s1t4" onchange="SetData(18,this.value)"/></td><td><input id="s1t5" onchange="SetData(19,this.value)"/></td><td><input id="s1t6" onchange="SetData(20,this.value)"/></td>
+    <td><input id="s1t7" onchange="SetData(21,this.value)"/></td><td><input id="s1t8" onchange="SetData(22,this.value)"/></td><td><input id="s1t9" onchange="SetData(23,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s2ch" onchange="SetData(24,this.value)"/></td><td>
+    <select id="s2cv" onchange="SetData(25,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s2tb" onchange="SetData(26,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s2t1" onchange="SetData(27,this.value)"/></td><td><input id="s2t2" onchange="SetData(28,this.value)"/></td><td><input id="s2t3" onchange="SetData(29,this.value)"/></td>
+    <td><input id="s2t4" onchange="SetData(30,this.value)"/></td><td><input id="s2t5" onchange="SetData(31,this.value)"/></td><td><input id="s2t6" onchange="SetData(32,this.value)"/></td>
+    <td><input id="s2t7" onchange="SetData(33,this.value)"/></td><td><input id="s2t8" onchange="SetData(34,this.value)"/></td><td><input id="s2t9" onchange="SetData(35,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s3ch" onchange="SetData(36,this.value)"/></td><td>
+    <select id="s3cv" onchange="SetData(37,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s3tb" onchange="SetData(38,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s3t1" onchange="SetData(39,this.value)"/></td><td><input id="s3t2" onchange="SetData(40,this.value)"/></td><td><input id="s3t3" onchange="SetData(41,this.value)"/></td>
+    <td><input id="s3t4" onchange="SetData(42,this.value)"/></td><td><input id="s3t5" onchange="SetData(43,this.value)"/></td><td><input id="s3t6" onchange="SetData(44,this.value)"/></td>
+    <td><input id="s3t7" onchange="SetData(45,this.value)"/></td><td><input id="s3t8" onchange="SetData(46,this.value)"/></td><td><input id="s3t9" onchange="SetData(47,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s4ch" onchange="SetData(48,this.value)"/></td><td>
+    <select id="s4cv" onchange="SetData(49,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s4tb" onchange="SetData(50,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s4t1" onchange="SetData(51,this.value)"/></td><td><input id="s4t2" onchange="SetData(52,this.value)"/></td><td><input id="s4t3" onchange="SetData(53,this.value)"/></td>
+    <td><input id="s4t4" onchange="SetData(54,this.value)"/></td><td><input id="s4t5" onchange="SetData(55,this.value)"/></td><td><input id="s4t6" onchange="SetData(56,this.value)"/></td>
+    <td><input id="s4t7" onchange="SetData(57,this.value)"/></td><td><input id="s4t8" onchange="SetData(58,this.value)"/></td><td><input id="s4t9" onchange="SetData(59,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s5ch" onchange="SetData(60,this.value)"/></td><td>
+    <select id="s5cv" onchange="SetData(61,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s5tb" onchange="SetData(62,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s5t1" onchange="SetData(63,this.value)"/></td><td><input id="s5t2" onchange="SetData(64,this.value)"/></td><td><input id="s5t3" onchange="SetData(65,this.value)"/></td>
+    <td><input id="s5t4" onchange="SetData(66,this.value)"/></td><td><input id="s5t5" onchange="SetData(67,this.value)"/></td><td><input id="s5t6" onchange="SetData(68,this.value)"/></td>
+    <td><input id="s5t7" onchange="SetData(69,this.value)"/></td><td><input id="s5t8" onchange="SetData(70,this.value)"/></td><td><input id="s5t9" onchange="SetData(71,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s6ch" onchange="SetData(72,this.value)"/></td><td>
+    <select id="s6cv" onchange="SetData(73,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s6tb" onchange="SetData(74,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s6t1" onchange="SetData(75,this.value)"/></td><td><input id="s6t2" onchange="SetData(76,this.value)"/></td><td><input id="s6t3" onchange="SetData(77,this.value)"/></td>
+    <td><input id="s6t4" onchange="SetData(78,this.value)"/></td><td><input id="s6t5" onchange="SetData(79,this.value)"/></td><td><input id="s6t6" onchange="SetData(80,this.value)"/></td>
+    <td><input id="s6t7" onchange="SetData(81,this.value)"/></td><td><input id="s6t8" onchange="SetData(82,this.value)"/></td><td><input id="s6t9" onchange="SetData(83,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s7ch" onchange="SetData(84,this.value)"/></td><td>
+    <select id="s7cv" onchange="SetData(85,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s7tb" onchange="SetData(86,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s7t1" onchange="SetData(87,this.value)"/></td><td><input id="s7t2" onchange="SetData(88,this.value)"/></td><td><input id="s7t3" onchange="SetData(89,this.value)"/></td>
+    <td><input id="s7t4" onchange="SetData(90,this.value)"/></td><td><input id="s7t5" onchange="SetData(91,this.value)"/></td><td><input id="s7t6" onchange="SetData(92,this.value)"/></td>
+    <td><input id="s7t7" onchange="SetData(93,this.value)"/></td><td><input id="s7t8" onchange="SetData(94,this.value)"/></td><td><input id="s7t9" onchange="SetData(95,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s8ch" onchange="SetData(96,this.value)"/></td><td>
+    <select id="s8cv" onchange="SetData(97,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s8tb" onchange="SetData(98,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s8t1" onchange="SetData(99,this.value)"/></td><td><input id="s8t2" onchange="SetData(100,this.value)"/></td><td><input id="s8t3" onchange="SetData(101,this.value)"/></td>
+    <td><input id="s8t4" onchange="SetData(102,this.value)"/></td><td><input id="s8t5" onchange="SetData(103,this.value)"/></td><td><input id="s8t6" onchange="SetData(104,this.value)"/></td>
+    <td><input id="s8t7" onchange="SetData(105,this.value)"/></td><td><input id="s8t8" onchange="SetData(106,this.value)"/></td><td><input id="s8t9" onchange="SetData(107,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s9ch" onchange="SetData(108,this.value)"/></td><td>
+    <select id="s9cv" onchange="SetData(109,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s9tb" onchange="SetData(110,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s9t1" onchange="SetData(111,this.value)"/></td><td><input id="s9t2" onchange="SetData(112,this.value)"/></td><td><input id="s9t3" onchange="SetData(113,this.value)"/></td>
+    <td><input id="s9t4" onchange="SetData(114,this.value)"/></td><td><input id="s9t5" onchange="SetData(115,this.value)"/></td><td><input id="s9t6" onchange="SetData(116,this.value)"/></td>
+    <td><input id="s9t7" onchange="SetData(117,this.value)"/></td><td><input id="s9t8" onchange="SetData(118,this.value)"/></td><td><input id="s9t9" onchange="SetData(119,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s10ch" onchange="SetData(120,this.value)"/></td><td>
+    <select id="s10cv" onchange="SetData(121,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s10tb" onchange="SetData(122,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s10t1" onchange="SetData(123,this.value)"/></td><td><input id="s10t2" onchange="SetData(124,this.value)"/></td><td><input id="s10t3" onchange="SetData(125,this.value)"/></td>
+    <td><input id="s10t4" onchange="SetData(126,this.value)"/></td><td><input id="s10t5" onchange="SetData(127,this.value)"/></td><td><input id="s10t6" onchange="SetData(128,this.value)"/></td>
+    <td><input id="s10t7" onchange="SetData(129,this.value)"/></td><td><input id="s10t8" onchange="SetData(130,this.value)"/></td><td><input id="s10t9" onchange="SetData(131,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s11ch" onchange="SetData(132,this.value)"/></td><td>
+    <select id="s11cv" onchange="SetData(133,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s11tb" onchange="SetData(134,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s11t1" onchange="SetData(135,this.value)"/></td><td><input id="s11t2" onchange="SetData(136,this.value)"/></td><td><input id="s11t3" onchange="SetData(137,this.value)"/></td>
+    <td><input id="s11t4" onchange="SetData(138,this.value)"/></td><td><input id="s11t5" onchange="SetData(139,this.value)"/></td><td><input id="s11t6" onchange="SetData(140,this.value)"/></td>
+    <td><input id="s11t7" onchange="SetData(141,this.value)"/></td><td><input id="s11t8" onchange="SetData(142,this.value)"/></td><td><input id="s11t9" onchange="SetData(143,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s12ch" onchange="SetData(144,this.value)"/></td><td>
+    <select id="s12cv" onchange="SetData(145,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s12tb" onchange="SetData(146,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s12t1" onchange="SetData(147,this.value)"/></td><td><input id="s12t2" onchange="SetData(148,this.value)"/></td><td><input id="s12t3" onchange="SetData(149,this.value)"/></td>
+    <td><input id="s12t4" onchange="SetData(150,this.value)"/></td><td><input id="s12t5" onchange="SetData(151,this.value)"/></td><td><input id="s12t6" onchange="SetData(152,this.value)"/></td>
+    <td><input id="s12t7" onchange="SetData(153,this.value)"/></td><td><input id="s12t8" onchange="SetData(154,this.value)"/></td><td><input id="s12t9" onchange="SetData(155,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s13ch" onchange="SetData(156,this.value)"/></td><td>
+    <select id="s13cv" onchange="SetData(157,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s13tb" onchange="SetData(158,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s13t1" onchange="SetData(159,this.value)"/></td><td><input id="s13t2" onchange="SetData(160,this.value)"/></td><td><input id="s13t3" onchange="SetData(161,this.value)"/></td>
+    <td><input id="s13t4" onchange="SetData(162,this.value)"/></td><td><input id="s13t5" onchange="SetData(163,this.value)"/></td><td><input id="s13t6" onchange="SetData(164,this.value)"/></td>
+    <td><input id="s13t7" onchange="SetData(165,this.value)"/></td><td><input id="s13t8" onchange="SetData(166,this.value)"/></td><td><input id="s13t9" onchange="SetData(167,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s14ch" onchange="SetData(168,this.value)"/></td><td>
+    <select id="s14cv" onchange="SetData(169,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s14tb" onchange="SetData(170,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s14t1" onchange="SetData(171,this.value)"/></td><td><input id="s14t2" onchange="SetData(172,this.value)"/></td><td><input id="s14t3" onchange="SetData(173,this.value)"/></td>
+    <td><input id="s14t4" onchange="SetData(174,this.value)"/></td><td><input id="s14t5" onchange="SetData(175,this.value)"/></td><td><input id="s14t6" onchange="SetData(176,this.value)"/></td>
+    <td><input id="s14t7" onchange="SetData(177,this.value)"/></td><td><input id="s14t8" onchange="SetData(178,this.value)"/></td><td><input id="s14t9" onchange="SetData(179,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s15ch" onchange="SetData(180,this.value)"/></td><td>
+    <select id="s15cv" onchange="SetData(181,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s15tb" onchange="SetData(182,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s15t1" onchange="SetData(183,this.value)"/></td><td><input id="s15t2" onchange="SetData(184,this.value)"/></td><td><input id="s15t3" onchange="SetData(185,this.value)"/></td>
+    <td><input id="s15t4" onchange="SetData(186,this.value)"/></td><td><input id="s15t5" onchange="SetData(187,this.value)"/></td><td><input id="s15t6" onchange="SetData(188,this.value)"/></td>
+    <td><input id="s15t7" onchange="SetData(189,this.value)"/></td><td><input id="s15t8" onchange="SetData(190,this.value)"/></td><td><input id="s15t9" onchange="SetData(191,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s16ch" onchange="SetData(192,this.value)"/></td><td>
+    <select id="s16cv" onchange="SetData(193,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s16tb" onchange="SetData(194,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s16t1" onchange="SetData(195,this.value)"/></td><td><input id="s16t2" onchange="SetData(196,this.value)"/></td><td><input id="s16t3" onchange="SetData(197,this.value)"/></td>
+    <td><input id="s16t4" onchange="SetData(198,this.value)"/></td><td><input id="s16t5" onchange="SetData(199,this.value)"/></td><td><input id="s16t6" onchange="SetData(200,this.value)"/></td>
+    <td><input id="s16t7" onchange="SetData(201,this.value)"/></td><td><input id="s16t8" onchange="SetData(202,this.value)"/></td><td><input id="s16t9" onchange="SetData(203,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s17ch" onchange="SetData(204,this.value)"/></td><td>
+    <select id="s17cv" onchange="SetData(205,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s17tb" onchange="SetData(206,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s17t1" onchange="SetData(207,this.value)"/></td><td><input id="s17t2" onchange="SetData(208,this.value)"/></td><td><input id="s17t3" onchange="SetData(209,this.value)"/></td>
+    <td><input id="s17t4" onchange="SetData(210,this.value)"/></td><td><input id="s17t5" onchange="SetData(211,this.value)"/></td><td><input id="s17t6" onchange="SetData(212,this.value)"/></td>
+    <td><input id="s17t7" onchange="SetData(213,this.value)"/></td><td><input id="s17t8" onchange="SetData(214,this.value)"/></td><td><input id="s17t9" onchange="SetData(215,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s18ch" onchange="SetData(216,this.value)"/></td><td>
+    <select id="s18cv" onchange="SetData(217,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s18tb" onchange="SetData(218,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s18t1" onchange="SetData(219,this.value)"/></td><td><input id="s18t2" onchange="SetData(220,this.value)"/></td><td><input id="s18t3" onchange="SetData(221,this.value)"/></td>
+    <td><input id="s18t4" onchange="SetData(222,this.value)"/></td><td><input id="s18t5" onchange="SetData(223,this.value)"/></td><td><input id="s18t6" onchange="SetData(224,this.value)"/></td>
+    <td><input id="s18t7" onchange="SetData(225,this.value)"/></td><td><input id="s18t8" onchange="SetData(226,this.value)"/></td><td><input id="s18t9" onchange="SetData(227,this.value)"/></td>
+  </tr>
+  <tr><td><input id="s19ch" onchange="SetData(228,this.value)"/></td><td>
+    <select id="s19cv" onchange="SetData(229,this.options[this.selectedIndex].value)">
+      <option value="0">CC#0/CV0</option><option value="1">CC#1/CV1</option><option value="2">CC#2/CV2</option><option value="3">CC#3/CV3</option><option value="4">CC#4</option><option value="5">CC#5</option><option value="6">CC#6</option><option value="7">CC#7</option>
+    </select></td>
+    <td>
+      <select id="s19tb" onchange="SetData(230,this.selectedIndex)">
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+      </select>
+    </td>
+    <td><input id="s19t1" onchange="SetData(231,this.value)"/></td><td><input id="s19t2" onchange="SetData(232,this.value)"/></td><td><input id="s19t3" onchange="SetData(233,this.value)"/></td>
+    <td><input id="s19t4" onchange="SetData(234,this.value)"/></td><td><input id="s19t5" onchange="SetData(235,this.value)"/></td><td><input id="s19t6" onchange="SetData(236,this.value)"/></td>
+    <td><input id="s19t7" onchange="SetData(237,this.value)"/></td><td><input id="s19t8" onchange="SetData(238,this.value)"/></td><td><input id="s19t9" onchange="SetData(239,this.value)"/></td>
+  </tr>
+</table>
+</div>
+<div id="dialog">
+  <div id="panel">
+    <div id="message">Reading current settings...</div>
+    <button id="dlgbtn" onclick="document.getElementById('dialog').style.display='none'">Cancel</button>
+  </div>
+</div>
+</div>
+<style>
+body{
+  position:relative;
+  margin:0;
+  padding:0;
+  background:#346;
+  color:#def;
+}
+#container{
+  width:850px;
+  margin:auto;
+  overflow:hidden;
+  padding:30px;
+  background:#234;
+}
+#dialog{
+  display:block;
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+}
+#dialog #panel{
+  position: absolute;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  margin:auto;
+  width:300px;
+  height:100px;
+  background:#eee;
+  border:1px solid #000;
+  padding:10px;
+  text-align: center;
+  border-radius: 5px;
+}
+#dialog #message{
+  display:block;
+  height:40px;
+  color:#000;
+}
+#dialog button{
+  display:inline-block;
+  width:100px;
+  height:30px;
+}
+input{
+  width:60px;
+  background:#fff;
+}
+input[type=range]{
+  -webkit-appearance:slider-vertical;
+}
+.inactive{
+  background:#aaa;
+}
+</style>
+<script>
+var dmxout=null;
+var dmxin=null;
+var midiin=null;
+var midioutputs=[];
+var midiinputs=[];
+var settings=[
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,
+];
+var ccval=[-1,-1,-1,-1,-1,-1,-1,-1];
+var ccvaldirty=[0,0,0,0,0,0,0,0];
+var readCount=0;
+var readNibble=0;
+function SetDirect(v){
+  dmxout.send([0xb0,115,v*64]);
+}
+function SetCCVal(n,v){
+  if(ccval[n]!=v){
+    ccval[n]=v;
+    ccvaldirty[n]=1;
+  }
+}
+function CCPolling(){
+  for(var i=0;i<8;++i){
+    if(ccvaldirty[i]){
+      dmxout.send([0xb0,i,ccval[i]]);
+      ccvaldirty[i]=0;
+    }
+  }
+}
+function SetData(a,v){
+  settings[a]=parseInt(v);
+  ViewSettings();
+  SendSettings(a,v);
+}
+function ViewSettings(){
+  for(var l=0;l<20;++l){
+    var i=l*12;
+    document.getElementById("s"+l+"ch").value=settings[i];
+    var s=settings[i+1];
+    document.getElementById("s"+l+"cv").selectedIndex=s;
+    document.getElementById("s"+l+"tb").selectedIndex=settings[i+2];
+    for(var j=0;j<9;++j)
+      document.getElementById("s"+l+"t"+(j+1)).value=settings[i+3+j];
+  }
+  SetEnable();
+}
+function SetEnable(){
+  for(var l=0;l<20;++l){
+    var i=l*12;
+    var s=settings[i];
+    if(s==0){
+      document.getElementById("s"+l+"cv").classList.add("inactive");
+      document.getElementById("s"+l+"tb").classList.add("inactive");
+      for(var j=0;j<9;++j)
+        document.getElementById("s"+l+"t"+(j+1)).classList.add("inactive");
+    }
+    else{
+      document.getElementById("s"+l+"cv").classList.remove("inactive");
+      document.getElementById("s"+l+"tb").classList.remove("inactive");
+      var j;
+      for(j=0;j<settings[i+2]&&j<9;++j)
+        document.getElementById("s"+l+"t"+(j+1)).classList.remove("inactive");
+      for(;j<9;++j)
+        document.getElementById("s"+l+"t"+(j+1)).classList.add("inactive");
+    }
+  }
+}
+function SendSettings(a,v){
+  dmxout.send([0xb0,110,a&0x7f]);
+  dmxout.send([0xb0,111,(a>>7)&0x7f]);
+  dmxout.send([0xb0,112,(v>>4)&0xf]);
+  dmxout.send([0xb0,112,v&0xf]);
+}
+function ReadSettings(){
+  Dialog("Reading current settings...","Cancel","block");
+  dmxout.send([0xb0,110,0]);
+  dmxout.send([0xb0,111,0]);
+  readCount=0;
+  ReadNext();
+}
+function SaveSettings(){
+  Dialog("Saving to device...","Cancel","block");
+  dmxout.send([0xb0,114,1]);
+}
+function Dialog(msg,btn,disp){
+  document.getElementById("message").innerHTML=msg;
+  document.getElementById("dlgbtn").innerHTML=btn;
+  document.getElementById("dialog").style.display=disp;
+}
+function ReadNext(){
+  dmxout.send([0xb0,113,0]);
+}
+function DmxRecv(ev){
+  if(ev.data[0]==176){
+    if(ev.data[1]==113){
+      if(readNibble==0){
+        settings[readCount]=((ev.data[2]<<4)&0xf0)+(settings[readCount]&0xf);
+        ++readNibble;
+      }
+      else{
+        settings[readCount]=(settings[readCount]&0xf0)+(ev.data[2]&0x0f);
+        readNibble=0;
+        ++readCount;
+        if(readCount<12*20)
+          ReadNext();
+        else{
+          ViewSettings();
+          Dialog("","","none");
+        }
+      }
+    }
+    else if(ev.data[1]==114){
+      Dialog("Save complete.","OK","block");
+    }
+  }
+}
+function MidiRecv(ev){
+  if(ev.data[0]==0xfe)
+    return;
+  if(ev.data[0]==176){
+    var e=document.getElementById("ch"+ev.data[1]);
+    if(e){
+      if(e.setValue)
+        e.setValue(ev.data[2],1);
+      else{
+        e.value=ev.data[2];
+        SetCCVal(ev.data[1],ev.data[2]);
+      }
+    }
+  }
+}
+function PortSet(){
+  if(midiin){
+    midiin.removeEventListener("midimessage",MidiRecv);
+  }
+  if(dmxin){
+    dmxin.onmidimessage=null;
+  }
+  midiin=midiinputs[document.getElementById("midiin").selectedIndex];
+  dmxin=midiinputs[document.getElementById("dmxin").selectedIndex];
+  midiin.addEventListener("midimessage",MidiRecv);
+  dmxin.onmidimessage=DmxRecv;
+  console.log("midiin:"+midiin.name);
+  console.log("dmxin:"+dmxin.name);
+  dmxout=midioutputs[document.getElementById("dmxout").selectedIndex];
+  dmxout.send([0xb0,115,0]);
+}
+function Init() {
+	navigator.requestMIDIAccess({sysex:false}).then(scb,ecb);
+	document.getElementById("dmxout").addEventListener("change",PortSet);
+  for(var i=0;i<8;++i){
+    var s=document.getElementById("ch"+i);
+    s.onchange=s.oninput=function(ev){
+      var ch=parseInt(ev.target.id.substring(2));
+      var v=parseInt(ev.target.value);
+      SetCCVal(ch,v);
+    }
+  }
+  setInterval(CCPolling,100);
+}
+function ecb(e) { console.log(e); }
+function scb(midiaccess) {
+    var i=0;
+    var outputIterator=midiaccess.outputs.values();
+    var fnd1=0,fnd2=0,fnd3=0;
+    for(var o=outputIterator.next(); !o.done; o=outputIterator.next()) {
+        midioutputs[i]=o.value;
+        document.getElementById("dmxout").options[i]=new Option(o.value.name);
+        if(fnd1==0 && o.value.name=="MocoLUFA"){
+          dmxout=midioutputs[i];
+          document.getElementById("dmxout").selectedIndex=i;
+          fnd1=1;
+          dmxout.send([0xb0,115,0]);
+        }
+        ++i;
+    }
+    if(fnd1==0)
+      document.getElementById("dmxout").selectedIndex=-1;
+    var inputIterator=midiaccess.inputs.values();
+    i=0;
+    for(var ip=inputIterator.next(); !ip.done; ip=inputIterator.next()){
+      midiinputs[i]=ip.value;
+      document.getElementById("dmxin").options[i]=new Option(ip.value.name);
+      document.getElementById("midiin").options[i]=new Option(ip.value.name);
+      if(fnd2==0 && ip.value.name=="MocoLUFA"){
+        dmxin=midiinputs[i];
+        dmxin.onmidimessage=DmxRecv;
+        document.getElementById("dmxin").selectedIndex=i;
+        fnd2=1;
+      }
+      if(fnd3==0 && ip.value.name!="MocoLUFA"){
+        midiin=midiinputs[i];
+        midiin.onmidimessage=MidiRecv;
+        document.getElementById("midiin").selectedIndex=i;
+        fnd3=1;
+      }
+      ++i;
+    }
+    if(fnd2==0)
+      document.getElementById("dmxin").selectedIndex=-1;
+    if(fnd3==0)
+      document.getElementById("midiin").selectedIndex=-1;
+    midiaccess.onstatechange=function(ev){
+      console.log("StateChange");
+      console.log(ev);
+    }
+    setTimeout(ReadSettings,500);
+}
+window.onload=Init;
+</script>
+</body>
+</html>
